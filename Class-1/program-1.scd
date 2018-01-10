@@ -1,3 +1,9 @@
+/**
+* To get this code working you must have in reason
+* In chanel one -> An NN-XT
+* In chanel two -> A Redrun
+*/
+
 
 /*
 * Initializes the MIDIClient, checks which available MIDI sources and destinations there are,
@@ -70,8 +76,13 @@ Scale.mahur.degrees;
 
 		var np = i%32;
 		switch (np.asInteger,
-			0, {m.noteOn(0, 60, 127)},
+			0, {
+				m.noteOn(0, 60, 127);
+				m.noteOn(0, 64, 127);
+				m.noteOn(0, 67, 127);
+			},
 			1, {m.noteOn(0, 66, 127)},
+			2, {m.noteOn(1, 37, 127)},
 			3, {m.noteOn(0, 64, 127)},
 			5, {m.noteOn(0, 60, 127)},
 			7, {m.noteOn(0, 60, 127)},

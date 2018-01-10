@@ -49,6 +49,7 @@ Scale.mahur.degrees;
 			}
 		);
 
+
 		0.125.wait;
 		//m.noteOff(0,30,64);
 	})
@@ -59,3 +60,38 @@ Scale.mahur.degrees;
 
 ~seqTd.play;
 ~seqTd.stop;
+
+
+(
+
+~seq2Td = Tdef(\seq2, {
+
+	inf.do({ | i |
+
+		var np = i%32;
+		switch (np.asInteger,
+			0, {m.noteOn(0, 60, 127)},
+			1, {m.noteOn(0, 66, 127)},
+			3, {m.noteOn(0, 64, 127)},
+			5, {m.noteOn(0, 60, 127)},
+			7, {m.noteOn(0, 60, 127)},
+			8, {m.noteOn(0, 60, 127)},
+			10, {m.noteOn(0, 60, 127)},
+			17, {m.noteOn(0, 60, 127)},
+			18, {m.noteOn(0, 60, 127)},
+			24, {m.noteOn(0, 60, 127)},
+			25, {m.noteOn(0, 60, 127)},
+			27, {m.noteOn(0, 60, 127)},
+			29, {m.noteOn(0, 60, 127)},
+			31, {m.noteOn(0, 60, 127)},
+		);
+
+		0.125.wait;
+	})
+
+})
+
+)
+
+~seq2Td.play;
+~seq2Td.stop;

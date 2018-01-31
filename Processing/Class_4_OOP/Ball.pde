@@ -2,7 +2,7 @@ import themidibus.*;
 
 class Ball {
 
-   PVector vel, pos, acc, ppos, grv;
+   PVector vel, pos, acc, ppos, grv, mouse;
    color c;
    MidiBus bus;
    
@@ -10,6 +10,7 @@ class Ball {
      vel = new PVector( random(-3, 3), -5 );
      pos = new PVector( random(0, width), random(0, height) );
      ppos = pos.copy();
+     mouse = new PVector(mouseX, mouseY);
      println("paos constructor");
      acc = new PVector( 0, 0 );
      c = color( random(0, 255), random(0, 255), random(0, 255) );
@@ -18,12 +19,26 @@ class Ball {
    
    public void Update() {
      
-     vel.add(acc);
-     pos.add(vel);
-     bounce();
-     Draw();
      
-     ppos = pos.copy();
+     //mouseInteraction();
+     //vel.add(acc);
+     //pos.add(vel);
+     //bounce();
+     //Draw();
+     //ppos = pos.copy();
+     
+    mouseInteraction();
+    vel.add(acc);
+    vel.mult(0.97);
+    pos.add(vel);
+
+    bounce();
+    draw();
+    if ( ppos.y == pos.y) {
+      pos.set(mouseX, mouseY);
+      vel.set(random(-2,2), -4);
+    }
+    ppos = pos.copy();
      
      
    }
@@ -32,7 +47,7 @@ class Ball {
      acc.add(a);
    }
    
-   public void Draw() {
+   private void draw() {
      
      stroke(0);
      fill(c);
@@ -89,6 +104,19 @@ class Ball {
      bus.sendNoteOn(0, note, 90);
      println("Sending note");
      
+   }
+   
+   private void mouseInteraction() {
+     mouse.set(mouseX, mouseY);
+     float dist = PVector.dist(pos,mouse);
+     if (  dist < 100 && dist > 30) {
+       PVector dir = new PVector();
+       dir = mouse.copy();
+       dir.sub(pos);
+       dir.normalize(); //we take out the magnitude, so now we only have the direction
+       dir.mult(0.1);
+       AddAcc(dir);
+     }
    }
 
    

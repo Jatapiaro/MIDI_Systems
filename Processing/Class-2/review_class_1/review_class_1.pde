@@ -26,7 +26,8 @@ void setup() {
   x = random(0, width);
   y = random(0, height);
   
-  velX = velY = 0;
+  velX = 0;
+  velY = -5;
   
   grv = 0.1;
   
@@ -68,7 +69,7 @@ void mouseInteraction() {
     accX = (abs(mouseX-x) < 200 )? abs(mouseX-x) * 0.001 : 0; 
     accY = (abs(mouseY-y) < 200 )? abs(mouseX-x) * 0.001 : 0;
     
-    velY += accY;
+    velY += accY + grv;
     velX += accX;
   
 }

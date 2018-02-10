@@ -17,21 +17,46 @@ import java.util.Map;
 
 public class Fiducials {
     
-  private HashMap<Integer, String> fiducials;
+  private HashMap<Integer, FiducialFunction> fiducials;
   
   public Fiducials() {
     
-    this.fiducials = new HashMap<Integer, String>();
+    this.fiducials = new HashMap<Integer, FiducialFunction>();
     
-    this.fiducials.put(1, FiducialsEnum.ARPEGGIMODE.toString());
-   
-    this.fiducials.put(2, FiducialsEnum.MARTENOTMODE.toString());
+    this.fiducials.put(1, 
+      new FiducialFunction(
+        FiducialsEnum.ARPEGGI.toString(),
+        FunctionsEnum.MODE.toString()
+      )
+    );
     
-    this.fiducials.put(3, FiducialsEnum.NOTEDOWN.toString());
+    this.fiducials.put(2, 
+      new FiducialFunction(
+        FiducialsEnum.MARTENOT.toString(),
+        FunctionsEnum.MODE.toString()
+      )
+    );
     
-    this.fiducials.put(4, FiducialsEnum.NOTEUP.toString());
+    this.fiducials.put(3, 
+      new FiducialFunction(
+        FiducialsEnum.NOTEDOWN.toString(),
+        FunctionsEnum.BUTTON.toString()
+      )
+    );
     
-    this.fiducials.put(5, FiducialsEnum.SYNTHMODE.toString());
+    this.fiducials.put(4, 
+      new FiducialFunction(
+        FiducialsEnum.NOTEUP.toString(),
+        FunctionsEnum.BUTTON.toString()
+      )
+    );
+
+    this.fiducials.put(5, 
+      new FiducialFunction(
+        FiducialsEnum.SYNTH.toString(),
+        FunctionsEnum.MODE.toString()
+      )
+    );
     
   }
   
@@ -52,8 +77,24 @@ public class Fiducials {
   * @param id of the fiducial 
   * @return String with the function that this id has
   */
-  public String getFiducialFunctionFromId( int id ) {
+  public FiducialFunction getFiducialFunctionFromId( int id ) {
     return this.fiducials.get(id);
+  }
+  
+  /**
+  * @param function that has certain fiducial 
+  * @return List with all the fiducials that has that function
+  */
+  public ArrayList<FiducialFunction> listAllFiducialsWithFunction(String function) {
+    ArrayList<FiducialFunction> fids = new ArrayList<FiducialFunction>();
+    for (Map.Entry fid : this.fiducials.entrySet()) {
+      FiducialFunction f = (FiducialFunction)fid.getValue();
+      if ( f.fiducialFunction.equals(function) ) {
+        f.id = (int)fid.getKey();
+        fids.add(f);
+      }
+    }
+    return fids;
   }
   
   @Override

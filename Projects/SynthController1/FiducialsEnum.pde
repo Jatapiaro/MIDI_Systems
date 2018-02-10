@@ -18,11 +18,11 @@
 */
 public enum FiducialsEnum
 {
-    ARPEGGIMODE("Arpeggi-Mode"),
-    MARTENOTMODE("Martenot-Mode"),
+    ARPEGGI("Arpeggi-Mode"),
+    MARTENOT("Martenot-Mode"),
     NOTEDOWN("Note-Down"),
     NOTEUP("Note-Up"),
-    SYNTHMODE("Synth-Mode");
+    SYNTH("Synth-Mode");
  
     private String fiducial;
  

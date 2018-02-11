@@ -49,6 +49,11 @@ void draw() {
   background(255);
   textFont(font,18*scale_factor);
   this.drawTuioObjects();
+  if ( !synthController.canStartRunning() ) {
+    fill(0, 0, 0);
+    text(synthController.missingFiducials(), width/2, height/2);
+    textAlign(CENTER, CENTER);
+  }
   synthController.play();
 }
 

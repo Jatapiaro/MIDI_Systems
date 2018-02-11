@@ -84,7 +84,7 @@ public class SynthController {
   * @return boolean
   * Tell us if all the needed fiducials are on screen
   */
-  private boolean canStartRunning() {
+  public boolean canStartRunning() {
     return this.hasModeFiducial && this.hasNoteUpFiducial && this.hasNoteDownFiducial &&
       this.hasMartenotRing;
   }
@@ -334,7 +334,7 @@ public class SynthController {
   * playing with the synth
   * @return String with a readable missing fiducial
   */
-  private String missingFiducials() {
+  public String missingFiducials() {
     StringBuilder sb = new StringBuilder();
     if ( !this.hasModeFiducial ) {
       sb.append("You are missing a Mode fiducial, please choose one of the following: \n");

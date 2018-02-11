@@ -410,6 +410,8 @@ public class SynthController {
       playAsMartenot();
     }
     
+    //this.midiBus.sendControllerChange(this.channel, 2, 2);
+    
   }
   
   /**
@@ -545,6 +547,10 @@ public class SynthController {
     this.midiBus.sendNoteOff(this.note);
   }
   
+  /**
+  * Update the current note using the ring
+  * @param TuioObject to handle the difference between position
+  */
   public void updateNoteWithMartenotRing(TuioObject tobj) {
     if ( this.mode.equals(FiducialsEnum.MARTENOT.toString()) ) {     
       float newPos = tobj.getPosition().getX();

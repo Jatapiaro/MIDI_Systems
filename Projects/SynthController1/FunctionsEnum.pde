@@ -13,7 +13,8 @@
 public enum FunctionsEnum
 {
     MODE("Mode"),
-    BUTTON("Button");
+    BUTTON("Button"),
+    SLIDE("Slides");
  
     private String function;
  

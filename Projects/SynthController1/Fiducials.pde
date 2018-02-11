@@ -58,6 +58,13 @@ public class Fiducials {
       )
     );
     
+    this.fiducials.put(6, 
+      new FiducialFunction(
+        FiducialsEnum.MARTENOTRING.toString(),
+        FunctionsEnum.SLIDE.toString()
+      )
+    );    
+    
   }
   
   /**

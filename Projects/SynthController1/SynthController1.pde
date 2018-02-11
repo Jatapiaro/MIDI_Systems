@@ -70,8 +70,7 @@ void drawTuioObjects() {
     }
     popMatrix();
     fill(255, 0, 0);
-    FiducialFunction ff = this.synthController.fiducials.getFiducialFunctionFromId(tobj.getSymbolID());
-    String info = (ff != null)? ff.visualText() : tobj.getSymbolID()+""; 
+    String info = this.synthController.getTextForDisplay(tobj);
     text(
       ""+info, 
       tobj.getScreenX(width), 
@@ -103,6 +102,8 @@ void addTuioObject(TuioObject tobj) {
 void updateTuioObject (TuioObject tobj) {
   if (verbose) println("set obj "+tobj.getSymbolID()+" ("+tobj.getSessionID()+") "+tobj.getX()+" "+tobj.getY()+" "+tobj.getAngle()
           +" "+tobj.getMotionSpeed()+" "+tobj.getRotationSpeed()+" "+tobj.getMotionAccel()+" "+tobj.getRotationAccel());
+  
+  this.synthController.handleUpdateOfFiducial(tobj);        
 }
 
 // called when an object is removed from the scene

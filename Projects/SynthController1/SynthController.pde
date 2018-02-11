@@ -7,7 +7,8 @@ public class SynthController {
   /*
   * Variables for all synths
   */
-  private boolean hasModeFiducial, hasNoteDownFiducial, hasNoteUpFiducial;
+  private boolean hasModeFiducial, hasNoteDownFiducial, hasNoteUpFiducial,
+    hasMartenotRing;
   private Fiducials fiducials;
   private int channel, inDeviceNum, outDeviceNum;
   private MidiBus midiBus;
@@ -29,6 +30,13 @@ public class SynthController {
   */
   private boolean sendNote = false;
   private Note previousNote;
+  
+  /*
+  * Variables to handle martenot mode
+  */
+  private boolean isPlayingNote = false;
+  private float startX = 0.0f;
+  
   
   
   /**
@@ -77,7 +85,8 @@ public class SynthController {
   * Tell us if all the needed fiducials are on screen
   */
   private boolean canStartRunning() {
-    return this.hasModeFiducial && this.hasNoteUpFiducial && this.hasNoteDownFiducial;
+    return this.hasModeFiducial && this.hasNoteUpFiducial && this.hasNoteDownFiducial &&
+      this.hasMartenotRing;
   }
   
   
@@ -120,10 +129,12 @@ public class SynthController {
   * Se the noew will increase or decrease its value
   */
   private void changeNote( boolean up ) {
-    int currentNote = ( up )? (this.note.pitch + 1) : (this.note.pitch - 1);
-    this.note.setPitch(currentNote);
-    //If we detect a note change we tell the program to send it to the instrument
-    this.sendNote = true;
+    if ( !this.mode.equals(FiducialsEnum.MARTENOT.toString()) ) {
+      int currentNote = ( up )? (this.note.pitch + 1) : (this.note.pitch - 1);
+      this.note.setPitch(currentNote);
+      //If we detect a note change we tell the program to send it to the instrument
+      this.sendNote = true;
+    }
   }  
   
   /**
@@ -140,6 +151,46 @@ public class SynthController {
     }
     return sb.toString();
   }  
+  
+  public String getTextForDisplay( TuioObject tobj ) {
+    
+    
+    StringBuilder sb = new StringBuilder();
+    /*
+    * We verify which function has the fiducial that just enters
+    * se we check in our Fiducials object, what we assigned to that id
+    */
+    FiducialFunction ff = this.fiducials.getFiducialFunctionFromId(tobj.getSymbolID());
+    
+    if ( ff != null ) {
+      
+      String name = ff.fiducialName;
+      
+      if ( name.equals(FiducialsEnum.NOTEUP.toString()) ) {
+        Note n = new Note( this.channel, (this.note.pitch+1), this.note.velocity );
+        sb.append("Note Up -> " + n.name());
+        return sb.toString();
+      }
+      
+      if ( name.equals(FiducialsEnum.NOTEDOWN.toString()) ) {
+        Note n = new Note( this.channel, (this.note.pitch-1), this.note.velocity );
+        sb.append("Note Down -> " + n.name());
+        return sb.toString();
+      }
+      
+      if ( name.equals(FiducialsEnum.ARPEGGI.toString()) ) {
+        sb.append(ff.visualText());
+        return sb.toString();
+      }      
+      
+      if ( name.equals(FiducialsEnum.MARTENOTRING.toString()) ) {
+        sb.append("Ring: "+this.note.name());
+        return sb.toString();
+      }         
+      
+    }
+     return sb.toString();
+  }
   
   /**
   * Handles the enter of a fiducial on screen
@@ -172,6 +223,10 @@ public class SynthController {
       } else if ( function.equals( FunctionsEnum.BUTTON.toString() ) ) {
         //We handle what this button does
         this.handleEnterOfButtonFiducial(ff);
+      } else if ( function.equals( FunctionsEnum.MODE.toString() ) ) {
+        this.changeMode( ff.fiducialName );
+      } else if ( function.equals( FunctionsEnum.SLIDE.toString() ) ) {
+        this.handleEnterOfSlideFiducial(ff, tobj.getPosition().getX());
       }
       
     } 
@@ -196,6 +251,17 @@ public class SynthController {
       
     }
     
+  }
+  
+  /**
+  * Handles if a fiduccial enters and his function is to act as an Slide
+  * @param FiducialFunction ff to check
+  */
+  private void handleEnterOfSlideFiducial(FiducialFunction ff, float startX) {
+    if ( ff.fiducialName.equals( FiducialsEnum.MARTENOTRING.toString() ) ) {
+      this.hasMartenotRing = true;
+      this.startX = startX;
+    }
   }
   
   /**
@@ -239,7 +305,29 @@ public class SynthController {
       
     }
     
-  }  
+  } 
+  
+  public void handleUpdateOfFiducial( TuioObject tobj ) {
+    
+    /*
+    * We verify which function has the fiducial that just enters
+    * se we check in our Fiducials object, what we assigned to that id
+    */
+    FiducialFunction ff = this.fiducials.getFiducialFunctionFromId(tobj.getSymbolID());
+  
+    /*
+    * If that id exists on our configuration
+    */
+    if ( ff != null ) {
+      
+      if ( ff.fiducialName.equals(FiducialsEnum.MARTENOTRING.toString()) ) {
+        println("Making an update");
+        this.updateNoteWithMartenotRing(tobj);
+      }
+      
+    }
+  
+  }
   
   /**
   * Returns a redable String of what fiducials are missing to start
@@ -263,12 +351,18 @@ public class SynthController {
       sb.append("\n");
       return sb.toString();
     }
-     if ( !this.hasNoteUpFiducial ) {
+    if ( !this.hasNoteUpFiducial ) {
       sb.append("You are missing a Note-Up fiducial, please put the next fiducial with ID: ");
       sb.append(this.fiducials.getFiducialIdFromFiducialName(FiducialsEnum.NOTEUP.toString()));
       sb.append("\n");
       return sb.toString();
     }
+    if ( !this.hasMartenotRing ) {
+      sb.append("You are missing a MartenotRing fiducial, please put the next fiducial with ID: ");
+      sb.append(this.fiducials.getFiducialIdFromFiducialName(FiducialsEnum.MARTENOTRING.toString()));
+      sb.append("\n");
+      return sb.toString();
+    }    
     return sb.toString();
   }
   
@@ -312,6 +406,8 @@ public class SynthController {
       * with the synth mode
       */      
       playAsSynth();
+    } else if ( this.mode.equals(FiducialsEnum.MARTENOT.toString()) ) {
+      playAsMartenot();
     }
     
   }
@@ -379,6 +475,16 @@ public class SynthController {
   }
   
   /**
+  * Play the synth in an martenot mode
+  */
+  private void playAsMartenot() {
+    if ( !this.isPlayingNote ) {
+      this.midiBus.sendNoteOn(note);
+      this.isPlayingNote = true;
+    }
+  }
+  
+  /**
   * Play the synth in synth mode
   */
   private void playAsSynth() {
@@ -405,9 +511,11 @@ public class SynthController {
   */
   private void resetParams() {
     this.sendNote = false;
+    this.isPlayingNote = false;
     this.midiBus.sendNoteOff(note);
     this.midiBus.sendNoteOff(previousNote);
     this.midiBus.sendNoteOff(lastNote);
+    this.note.setPitch(60);
   }
   
   /**
@@ -419,6 +527,7 @@ public class SynthController {
     this.hasModeFiducial = false;
     this.hasNoteUpFiducial = false;
     this.hasNoteDownFiducial = false;
+    this.hasMartenotRing = false;
   }
   
   /**
@@ -434,6 +543,23 @@ public class SynthController {
       this.midiBus.sendNoteOff(this.previousNote);
     }
     this.midiBus.sendNoteOff(this.note);
+  }
+  
+  public void updateNoteWithMartenotRing(TuioObject tobj) {
+    if ( this.mode.equals(FiducialsEnum.MARTENOT.toString()) ) {     
+      float newPos = tobj.getPosition().getX();
+      println(newPos + " -- "+this.startX);
+      int newPitch = this.note.pitch;
+      if ( newPos > this.startX ) {
+        newPitch++;
+      } else if (newPos < this.startX) {
+        newPitch--;
+      }
+      this.startX = newPos;
+      this.midiBus.sendNoteOff(note);
+      this.isPlayingNote = false;
+      this.note.setPitch(newPitch);
+    }
   }
   
 

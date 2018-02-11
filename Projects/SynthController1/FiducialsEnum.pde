@@ -20,7 +20,7 @@ public enum FiducialsEnum
 {
     ARPEGGI("Arpeggi-Mode"),
     MARTENOT("Martenot-Mode"),
-    MARTENOTRING("Martenor-Ring"),
+    MARTENOTRING("Martenot-Ring"),
     NOTEDOWN("Note-Down"),
     NOTEUP("Note-Up"),
     SYNTH("Synth-Mode");

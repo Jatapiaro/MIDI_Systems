@@ -64,9 +64,10 @@ public class Fiducials {
   * @param function that we need to know which fiducial has control over it
   * @return int the id of the fiducial that controls that function
   */
-  public int getFiducialIdFromFunction( String function ) {
+  public int getFiducialIdFromFiducialName( String function ) {
     for (Map.Entry fid : this.fiducials.entrySet()) {
-      if ( fid.getValue().equals(function) ) {
+      FiducialFunction ff = (FiducialFunction)fid.getValue();
+      if ( ff.fiducialName.equals(function) ) {
         return (int)fid.getKey();
       }
     }

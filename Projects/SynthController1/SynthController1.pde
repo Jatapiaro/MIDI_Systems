@@ -70,8 +70,10 @@ void drawTuioObjects() {
     }
     popMatrix();
     fill(255, 0, 0);
+    FiducialFunction ff = this.synthController.fiducials.getFiducialFunctionFromId(tobj.getSymbolID());
+    String info = (ff != null)? ff.visualText() : tobj.getSymbolID()+""; 
     text(
-      ""+this.synthController.fiducials.getFiducialFunctionFromId(tobj.getSymbolID()).visualText(), 
+      ""+info, 
       tobj.getScreenX(width), 
       tobj.getScreenY(height)
       ); 
@@ -79,6 +81,12 @@ void drawTuioObjects() {
   }
 }
 
+@Override
+void exit() {
+  println("Stoped");
+  this.synthController.stopPlaying();
+  super.exit();
+}
 
 // --------------------------------------------------------------
 // these callback methods are called whenever a TUIO event occurs
@@ -100,6 +108,7 @@ void updateTuioObject (TuioObject tobj) {
 // called when an object is removed from the scene
 void removeTuioObject(TuioObject tobj) {
   if (verbose) println("del obj "+tobj.getSymbolID()+" ("+tobj.getSessionID()+")");
+  this.synthController.handleExitOfFiducial(tobj);
 }
 
 // --------------------------------------------------------------

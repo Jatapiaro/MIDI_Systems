@@ -122,6 +122,7 @@ public class SynthController {
   private void changeNote( boolean up ) {
     int currentNote = ( up )? (this.note.pitch + 1) : (this.note.pitch - 1);
     this.note.setPitch(currentNote);
+    //If we detect a note change we tell the program to send it to the instrument
     this.sendNote = true;
   }  
   
@@ -140,30 +141,55 @@ public class SynthController {
     return sb.toString();
   }  
   
-  
+  /**
+  * Handles the enter of a fiducial on screen
+  * @param TuioObject obj the object that enters on the screen
+  */
   public void handleEnterOfFiducial( TuioObject tobj ) {
     
+    /*
+    * We verify which function has the fiducial that just enters
+    * se we check in our Fiducials object, what we assigned to that id
+    */
     FiducialFunction ff = this.fiducials.getFiducialFunctionFromId(tobj.getSymbolID());
   
+    
+    /*
+    * If that id exists on our configuration
+    */
     if ( ff != null ) {
+      
+      
+      //We take the function that this fiducial does
       String function = ff.fiducialFunction;
+      
+      //If it acts as a MODE fiducial
       if ( function.equals( FunctionsEnum.MODE.toString() ) ) {
-        
+        //We change the current mode of control
         this.changeMode( ff.fiducialName );
         
+        //Else if it has a Button Function
       } else if ( function.equals( FunctionsEnum.BUTTON.toString() ) ) {
-        this.handleEnterOfButtonFiduccial(ff);
+        //We handle what this button does
+        this.handleEnterOfButtonFiducial(ff);
       }
-    }
-    
+      
+    } 
   }
   
-  private void handleEnterOfButtonFiduccial(FiducialFunction ff) {
+  
+  /**
+  * Handles if a fiduccial enters and his function is to act as a button
+  * @param FiducialFunction ff to check
+  */
+  private void handleEnterOfButtonFiducial(FiducialFunction ff) {
     
+    //If this fiducial has to execute a note up
     if ( ff.fiducialName.equals( FiducialsEnum.NOTEUP.toString() ) ) {
       
       this.hasNoteUpFiducial = true;
       
+    //If this fiducial has to execute a note down  
     } else if ( ff.fiducialName.equals( FiducialsEnum.NOTEDOWN.toString() ) ) {
       
       this.hasNoteDownFiducial = true;
@@ -172,23 +198,23 @@ public class SynthController {
     
   }
   
-  
-  private void resetParams() {
-    this.sendNote = false;
-    this.midiBus.sendNoteOff(note);
-    this.midiBus.sendNoteOff(previousNote);
-    this.midiBus.sendNoteOff(lastNote);
-  }
-  
-
-  
+  /**
+  * Handles the exit of a fiducial from the screen
+  * @param TuioObject obj to evaluate
+  */
   public void handleExitOfFiducial( TuioObject tobj ) {
-    
-  
+
+    /*
+    * We verify which function has the fiducial that just enters
+    * se we check in our Fiducials object, what we assigned to that id
+    */
     FiducialFunction ff = this.fiducials.getFiducialFunctionFromId(tobj.getSymbolID());
   
+    //If that id is registered in ur fiducials
     if ( ff != null ) {
+      //We check the function that this fiducial must execute
       String function = ff.fiducialFunction;
+      //If the fiducial acts like a button
       if ( function.equals( FunctionsEnum.BUTTON.toString() ) ) {
         this.handleExitOfButtonFiduccial(ff);
       }
@@ -196,89 +222,30 @@ public class SynthController {
     
   }
   
+  /**
+  * Handles the exit of a fiducial form the screen
+  * @param FiducialFunction ff
+  */
   private void handleExitOfButtonFiduccial( FiducialFunction ff ) {
     
+    //If this fiducial has to execute a note up
     if ( ff.fiducialName.equals( FiducialsEnum.NOTEUP.toString() ) ) {
-      
+      //We change the note 1/2 step up
       this.changeNote(true);
-      
+    //If this fiducial has to execute a note down  
     } else if ( ff.fiducialName.equals( FiducialsEnum.NOTEDOWN.toString() ) ) {
-      
+      //We change the note 1/2 step down
       this.changeNote(false);
       
     }
     
-  }
+  }  
   
-  
-  public void play() {
-    if ( this.canStartRunning() ) {
-      this.play(true);
-    } else {
-      println(missingFiducials());
-    }
-  }
-  
-  private void play( boolean play ) {
-    
-    if ( this.mode.equals(FiducialsEnum.ARPEGGI.toString()) ) {
-      playAsArpeggi();
-    } else if ( this.mode.equals(FiducialsEnum.SYNTH.toString()) ) {
-      playAsSynth();
-    }
-    
-  }
-  
-  private void playAsArpeggi() {
-    
-    if ( this.scaleToRandomize.size() == 0 ) {
-      this.scaleToRandomize = new ArrayList<Integer>();
-      for ( int i : scale ) {
-        this.scaleToRandomize.add(i);
-      }
-      Collections.shuffle(this.scaleToRandomize);
-    }
-    
-    int millis = millis();
-    if ( millis > (this.lastTimeOfNote + this.differenceBetweenNotes) ) {
-      
-      if ( this.lastNote != null ) {
-        this.midiBus.sendNoteOff(this.lastNote);
-      }
-      
-      
-      int currentPitch = this.note.pitch;
-      int currentVelocity = this.note.velocity;
-      int currentNoteChannel = this.note.channel;
-      
-      int nextPitch = int(random(scaleToRandomize.size()));
-      currentPitch += this.scaleToRandomize.get(nextPitch);
-      this.scaleToRandomize.remove(nextPitch);
-      
-      this.lastNote = new Note(currentNoteChannel, currentPitch, currentVelocity);
-      
-      this.midiBus.sendNoteOn(lastNote);
-      this.lastTimeOfNote = millis;
-      
-    }
-    
-  }
-  
-  private void playAsSynth() {
-    if ( this.sendNote ) {
-      this.sendNote = false;
-      this.midiBus.sendNoteOn(note);
-      this.midiBus.sendNoteOff(note);
-    }
-  }
-  
-  private void startHasParams() {
-    this.hasModeFiducial = false;
-    this.hasNoteUpFiducial = false;
-    this.hasNoteDownFiducial = false;
-  }
-  
-  
+  /**
+  * Returns a redable String of what fiducials are missing to start
+  * playing with the synth
+  * @return String with a readable missing fiducial
+  */
   private String missingFiducials() {
     StringBuilder sb = new StringBuilder();
     if ( !this.hasModeFiducial ) {
@@ -305,11 +272,166 @@ public class SynthController {
     return sb.toString();
   }
   
-
+  /**
+  * Start playing with the synth, and must be called on the main draw function
+  */
+  public void play() {
+    
+    //  If the synth hast everything to start
+    if ( this.canStartRunning() ) {
+      //We called an overloaded function call play with a boolean value
+      this.play(true);
+    } else {
+      /*
+      * In case it doesnt have everything to run
+      * we tell the user what we need
+      */
+      println(missingFiducials());
+    }
+    
+  }
   
+  /**
+  * Overload play method, this
+  * exceute the logic to send MIDI 
+  * to reason
+  */
+  private void play( boolean play ) {
+    
+    //If we are playing with the arpeggi mode
+    if ( this.mode.equals(FiducialsEnum.ARPEGGI.toString()) ) {
+      /*
+      * We call the function to execute all the logic to play
+      * with the arpeggi mode
+      */
+      playAsArpeggi();
+    //Else if we are playing with the synth mode
+    } else if ( this.mode.equals(FiducialsEnum.SYNTH.toString()) ) {
+      /*
+      * We call the function to execute all the logic to play
+      * with the synth mode
+      */      
+      playAsSynth();
+    }
+    
+  }
+  
+  /**
+  * Play the synth in an arpeggi mode
+  */
+  private void playAsArpeggi() {
+    /*
+    * We defined an arraylist up there
+    * If their size is equal to 0, we add some
+    * notes to be played
+    */
+    if ( this.scaleToRandomize.size() == 0 ) {
+      this.scaleToRandomize = new ArrayList<Integer>();
+      for ( int i : scale ) {
+        this.scaleToRandomize.add(i);
+      }
+      //We shuffle the list to have random notes
+      Collections.shuffle(this.scaleToRandomize);
+    }
+    
+    //We check the current time
+    int millis = millis();
+    
+    /*
+    * If the current time is greather than
+    * the last time we send a note + the difference between a note and another
+    */
+    if ( millis > (this.lastTimeOfNote + this.differenceBetweenNotes) ) {
+      
+      /*
+      * If we sent a previous note
+      * we turn it off so it dont keep ringing
+      */
+      if ( this.lastNote != null ) {
+        this.midiBus.sendNoteOff(this.lastNote);
+      }
+      
+      /*
+      * We tacke out all the params of our global note
+      */
+      int currentPitch = this.note.pitch;
+      int currentVelocity = this.note.velocity;
+      int currentNoteChannel = this.note.channel;
+      
+      /*
+      * We take a random value from our list of notes
+      * and remove the used note
+      */
+      int nextPitch = int(random(scaleToRandomize.size()));
+      currentPitch += this.scaleToRandomize.get(nextPitch);
+      this.scaleToRandomize.remove(nextPitch);
+      
+      //We assign a last note played
+      this.lastNote = new Note(currentNoteChannel, currentPitch, currentVelocity);
+      
+      //We send the note
+      this.midiBus.sendNoteOn(lastNote);
+      //We save the last moment a note was sent
+      this.lastTimeOfNote = millis;
+      
+    }
+    
+  }
+  
+  /**
+  * Play the synth in synth mode
+  */
+  private void playAsSynth() {
+    /*
+    * If the note was changed
+    * we have to send it to the instrument
+    */
+    if ( this.sendNote ) {
+      /*
+      * We tell the program to send just one note
+      * and wait for another one
+      */
+      this.sendNote = false;
+      //Instant send and turn off the note
+      this.midiBus.sendNoteOn(note);
+      this.midiBus.sendNoteOff(note);
+    }
+  }
+  
+  /**
+  * Reset the playing parameters
+  * We told the program to not
+  * send any noise and stop all running noise
+  */
+  private void resetParams() {
+    this.sendNote = false;
+    this.midiBus.sendNoteOff(note);
+    this.midiBus.sendNoteOff(previousNote);
+    this.midiBus.sendNoteOff(lastNote);
+  }
+  
+  /**
+  * Auxiliar method to initialice all the boolean values
+  * of what our controller needs to start playing
+  * This is called on the class constructor
+  */
+  private void startHasParams() {
+    this.hasModeFiducial = false;
+    this.hasNoteUpFiducial = false;
+    this.hasNoteDownFiducial = false;
+  }
+  
+  /**
+  * This is executed when the program is closed
+  * Basically we stop all the noise in case is something
+  * running
+  */
   public void stopPlaying() {
     if ( this.lastNote != null ) {
       this.midiBus.sendNoteOff(this.lastNote);
+    }
+    if ( this.previousNote != null ) {
+      this.midiBus.sendNoteOff(this.previousNote);
     }
     this.midiBus.sendNoteOff(this.note);
   }

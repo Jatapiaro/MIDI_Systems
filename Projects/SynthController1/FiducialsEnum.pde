@@ -21,6 +21,7 @@ public enum FiducialsEnum
     ARPEGGI("Arpeggi-Mode"),
     MARTENOT("Martenot-Mode"),
     MARTENOTRING("Martenot-Ring"),
+    MODWHEEL("Mod-Wheel"),
     NOTEDOWN("Note-Down"),
     NOTEUP("Note-Up"),
     SYNTH("Synth-Mode");

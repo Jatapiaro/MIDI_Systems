@@ -8,13 +8,15 @@ public class SynthController {
   * Variables for all synths
   */
   private boolean hasModeFiducial, hasNoteDownFiducial, hasNoteUpFiducial,
-    hasMartenotRing;
+    hasMartenotRingFiducial, hasModWheelFiducial;
   private Fiducials fiducials;
   private int channel, inDeviceNum, outDeviceNum;
   private MidiBus midiBus;
   private Note note;
   private String mode;
   private HashMap<Integer, TuioBlob> onScreenFiducials;
+  private float startY = 0.0f;
+  private int modWheel = 0;
   
   
   /*
@@ -54,6 +56,7 @@ public class SynthController {
     this.midiBus = new MidiBus(this, this.inDeviceNum, this.outDeviceNum);
     this.note = new Note(channel, 60, 127);
     this.previousNote = new Note(channel, 60, 70);
+    this.midiBus.sendControllerChange(0, 1, this.modWheel);
     
     
     /*
@@ -69,7 +72,7 @@ public class SynthController {
     * arpeggi mode
     */
     this.lastTimeOfNote = millis();
-    this.differenceBetweenNotes = 750; //Milliseconds
+    this.differenceBetweenNotes = 500; //Milliseconds
     this.scaleToRandomize = new ArrayList<Integer>();
     
     /*
@@ -86,7 +89,7 @@ public class SynthController {
   */
   public boolean canStartRunning() {
     return this.hasModeFiducial && this.hasNoteUpFiducial && this.hasNoteDownFiducial &&
-      this.hasMartenotRing;
+      this.hasMartenotRingFiducial && this.hasModWheelFiducial;
   }
   
   
@@ -184,9 +187,24 @@ public class SynthController {
       }      
       
       if ( name.equals(FiducialsEnum.MARTENOTRING.toString()) ) {
-        sb.append("Ring: "+this.note.name());
+        sb.append("Ring: "+ this.note.name() + " / " + this.differenceBetweenNotes );
         return sb.toString();
-      }         
+      }   
+      
+      if ( name.equals(FiducialsEnum.SYNTH.toString()) ) {
+        sb.append(ff.visualText());
+        return sb.toString();
+      } 
+      
+      if ( name.equals(FiducialsEnum.MARTENOT.toString()) ) {
+        sb.append(ff.visualText());
+        return sb.toString();
+      }  
+      
+      if ( name.equals(FiducialsEnum.MODWHEEL.toString()) ) {
+        sb.append("ModWheel: " +this.modWheel+"%");
+        return sb.toString();
+      }  
       
     }
      return sb.toString();
@@ -226,7 +244,7 @@ public class SynthController {
       } else if ( function.equals( FunctionsEnum.MODE.toString() ) ) {
         this.changeMode( ff.fiducialName );
       } else if ( function.equals( FunctionsEnum.SLIDE.toString() ) ) {
-        this.handleEnterOfSlideFiducial(ff, tobj.getPosition().getX());
+        this.handleEnterOfSlideFiducial(ff, tobj.getPosition().getX(), tobj.getScreenY(height));
       }
       
     } 
@@ -257,10 +275,13 @@ public class SynthController {
   * Handles if a fiduccial enters and his function is to act as an Slide
   * @param FiducialFunction ff to check
   */
-  private void handleEnterOfSlideFiducial(FiducialFunction ff, float startX) {
+  private void handleEnterOfSlideFiducial(FiducialFunction ff, float startX, float startY) {
     if ( ff.fiducialName.equals( FiducialsEnum.MARTENOTRING.toString() ) ) {
-      this.hasMartenotRing = true;
+      this.hasMartenotRingFiducial = true;
       this.startX = startX;
+    } else if ( ff.fiducialName.equals( FiducialsEnum.MODWHEEL.toString() ) ) {
+      this.hasModWheelFiducial = true;
+      this.startY = startY;
     }
   }
   
@@ -321,9 +342,13 @@ public class SynthController {
     if ( ff != null ) {
       
       if ( ff.fiducialName.equals(FiducialsEnum.MARTENOTRING.toString()) ) {
-        println("Making an update");
         this.updateNoteWithMartenotRing(tobj);
       }
+      
+      if ( ff.fiducialName.equals(FiducialsEnum.MODWHEEL.toString()) ) {
+        this.updateModWheelValue(tobj);
+      }
+      
       
     }
   
@@ -357,14 +382,23 @@ public class SynthController {
       sb.append("\n");
       return sb.toString();
     }
-    if ( !this.hasMartenotRing ) {
+    if ( !this.hasMartenotRingFiducial ) {
       sb.append("You are missing a MartenotRing fiducial, please put the next fiducial with ID: ");
       sb.append(this.fiducials.getFiducialIdFromFiducialName(FiducialsEnum.MARTENOTRING.toString()));
       sb.append("\n");
       return sb.toString();
-    }    
+    } 
+    
+    if ( !this.hasModWheelFiducial ) {
+      sb.append("You are missing a ModWheel fiducial, please put the next fiducial with ID: ");
+      sb.append(this.fiducials.getFiducialIdFromFiducialName(FiducialsEnum.MODWHEEL.toString()));
+      sb.append("\n");
+      return sb.toString();
+    } 
+    
     return sb.toString();
   }
+  
   
   /**
   * Start playing with the synth, and must be called on the main draw function
@@ -442,14 +476,6 @@ public class SynthController {
     if ( millis > (this.lastTimeOfNote + this.differenceBetweenNotes) ) {
       
       /*
-      * If we sent a previous note
-      * we turn it off so it dont keep ringing
-      */
-      if ( this.lastNote != null ) {
-        this.midiBus.sendNoteOff(this.lastNote);
-      }
-      
-      /*
       * We tacke out all the params of our global note
       */
       int currentPitch = this.note.pitch;
@@ -469,6 +495,7 @@ public class SynthController {
       
       //We send the note
       this.midiBus.sendNoteOn(lastNote);
+      this.midiBus.sendNoteOff(this.lastNote);
       //We save the last moment a note was sent
       this.lastTimeOfNote = millis;
       
@@ -517,6 +544,7 @@ public class SynthController {
     this.midiBus.sendNoteOff(note);
     this.midiBus.sendNoteOff(previousNote);
     this.midiBus.sendNoteOff(lastNote);
+    this.differenceBetweenNotes = 500;
     this.note.setPitch(60);
   }
   
@@ -529,7 +557,8 @@ public class SynthController {
     this.hasModeFiducial = false;
     this.hasNoteUpFiducial = false;
     this.hasNoteDownFiducial = false;
-    this.hasMartenotRing = false;
+    this.hasMartenotRingFiducial = false;
+    this.hasModWheelFiducial = false;
   }
   
   /**
@@ -547,24 +576,45 @@ public class SynthController {
     this.midiBus.sendNoteOff(this.note);
   }
   
+    /**
+  * Update the modwheel value
+  * @param TuioObject to handle the difference between position
+  */
+  public void updateModWheelValue(TuioObject tobj) {
+      
+      float newY = tobj.getScreenY(width);
+      int newModWheel = (int)map(newY, startY, height, 100, 0);
+      if ( newModWheel < 0 ) {
+        newModWheel = 0;
+      } else if ( newModWheel > 100 ) {
+        newModWheel = 100;
+      }
+      this.modWheel = newModWheel;
+      //int[] mod = {1, 101, 103, 104};
+      //int controller = int(random(4));
+      this.midiBus.sendControllerChange(0, 1, this.modWheel);
+   
+  }
+  
   /**
   * Update the current note using the ring
   * @param TuioObject to handle the difference between position
   */
   public void updateNoteWithMartenotRing(TuioObject tobj) {
-    if ( this.mode.equals(FiducialsEnum.MARTENOT.toString()) ) {     
-      float newPos = tobj.getPosition().getX();
-      println(newPos + " -- "+this.startX);
-      int newPitch = this.note.pitch;
-      if ( newPos > this.startX ) {
-        newPitch++;
-      } else if (newPos < this.startX) {
-        newPitch--;
-      }
-      this.startX = newPos;
-      this.midiBus.sendNoteOff(note);
+    if ( this.mode.equals(FiducialsEnum.MARTENOT.toString()) ) { 
+      
+      float newX = tobj.getScreenX(width);
+      int newNote = (int)map(newX, startX, width, 60, 100);
+      this.midiBus.sendNoteOff(this.note);
       this.isPlayingNote = false;
-      this.note.setPitch(newPitch);
+      this.note.setPitch(newNote);
+      
+    } else if ( this.mode.equals(FiducialsEnum.ARPEGGI.toString()) ) {
+      
+      float newX = tobj.getScreenX(width);
+      int newNote = (int)map(newX, startX, width, 100, 1000);
+      this.differenceBetweenNotes = newNote;
+      
     }
   }
   

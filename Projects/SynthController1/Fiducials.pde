@@ -63,7 +63,14 @@ public class Fiducials {
         FiducialsEnum.MARTENOTRING.toString(),
         FunctionsEnum.SLIDE.toString()
       )
-    );    
+    ); 
+    
+    this.fiducials.put(7, 
+      new FiducialFunction(
+        FiducialsEnum.MODWHEEL.toString(),
+        FunctionsEnum.SLIDE.toString()
+      )
+    ); 
     
   }
   

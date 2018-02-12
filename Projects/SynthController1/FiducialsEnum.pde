@@ -1,6 +1,6 @@
 /**
 * FiducialsEnum
-*
+
 * Class to have an enumerator, so 
 * you define just once all the 
 * components of your synth.
@@ -12,8 +12,9 @@
 * and if you need to change a value, you need to do it just once
 *
 * @author Jacobo Tapia - A01336590
-* @author
-* @author
+* @author Sofía Aguirre - A01332562
+* @author Maximiliano Carmona Miranda - A01650052
+*
 *
 */
 public enum FiducialsEnum

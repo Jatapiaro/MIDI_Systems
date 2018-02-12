@@ -6,8 +6,9 @@
 * components of your synth.
 *
 * @author Jacobo Tapia - A01336590
-* @author
-* @author
+* @author Sofía Aguirre - A01332562
+* @author Maximiliano Carmona Miranda - A01650052
+*
 *
 */
 public enum FunctionsEnum

@@ -1,3 +1,10 @@
+/*
+* @author Jacobo Tapia - A01336590
+* @author Sofía Aguirre - A01332562
+* @author Maximiliano Carmona Miranda - A01650052
+*
+*/
+
 import TUIO.*;
 
 SynthController synthController;
@@ -50,9 +57,12 @@ void draw() {
   textFont(font,18*scale_factor);
   this.drawTuioObjects();
   if ( !synthController.canStartRunning() ) {
-    fill(0, 0, 0);
-    text(synthController.missingFiducials(), width/2, height/2);
-    textAlign(CENTER, CENTER);
+    pushMatrix();{
+      fill(0, 0, 0);
+      text(synthController.missingFiducials(), (width/2)-(width/4), height/2);
+      textAlign(CENTER, CENTER);
+    }
+    popMatrix();
   }
   synthController.play();
 }

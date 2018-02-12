@@ -1,3 +1,10 @@
+/*
+* @author Jacobo Tapia - A01336590
+* @author Sofía Aguirre - A01332562
+* @author Maximiliano Carmona Miranda - A01650052
+*
+*/
+
 public class FiducialFunction {
   
   String fiducialName, fiducialFunction;

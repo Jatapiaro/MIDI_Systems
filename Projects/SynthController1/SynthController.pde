@@ -207,7 +207,8 @@ public class SynthController {
       }  
       
     }
-     return sb.toString();
+    sb.append(tobj.getSymbolID() + "does nothing");
+    return sb.toString();
   }
   
   /**
@@ -361,15 +362,6 @@ public class SynthController {
   */
   public String missingFiducials() {
     StringBuilder sb = new StringBuilder();
-    if ( !this.hasModeFiducial ) {
-      sb.append("You are missing a Mode fiducial, please choose one of the following: \n");
-      sb.append(
-        this.formatList(
-          this.fiducials.listAllFiducialsWithFunction(FunctionsEnum.MODE.toString())
-        )
-      ); 
-      return sb.toString();
-    } 
     if ( !this.hasNoteDownFiducial ) {
       sb.append("You are missing a Note-Down fiducial, please put the next fiducial with ID: ");
       sb.append(this.fiducials.getFiducialIdFromFiducialName(FiducialsEnum.NOTEDOWN.toString()));
@@ -393,6 +385,16 @@ public class SynthController {
       sb.append("You are missing a ModWheel fiducial, please put the next fiducial with ID: ");
       sb.append(this.fiducials.getFiducialIdFromFiducialName(FiducialsEnum.MODWHEEL.toString()));
       sb.append("\n");
+      return sb.toString();
+    } 
+    
+    if ( !this.hasModeFiducial ) {
+      sb.append("You are missing a Mode fiducial, please choose one of the following: \n");
+      sb.append(
+        this.formatList(
+          this.fiducials.listAllFiducialsWithFunction(FunctionsEnum.MODE.toString())
+        )
+      ); 
       return sb.toString();
     } 
     

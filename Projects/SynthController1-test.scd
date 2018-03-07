@@ -10,14 +10,15 @@ m = MIDIOut(0);
 		var indx;
 		m.noteOn(0, 60, 127);
 		m.noteOff(0, 60, 127);
-		0.50.wait;
+
+		0.5.wait;
 	});
 
 })
 
 )
 
-m.control(0, 1, rrand(0, 127));
+m.control(0, 103, rrand(0, 100));
 ~mel.play(t);
 ~mel.stop;
 

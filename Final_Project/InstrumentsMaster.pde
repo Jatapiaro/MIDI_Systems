@@ -35,7 +35,7 @@ public class InstrumentsMaster {
     
     /* Initialice velocity of steps */
     this.lastStepSoundAt = millis();
-    this.stepVelocity = 100;
+    this.stepVelocity = 500;
     this.step = 0;
     
     /* Initialice midibus */
@@ -43,6 +43,49 @@ public class InstrumentsMaster {
     this.outDeviceNum = 1;
     this.midiBus = new MidiBus(this, this.inDeviceNum, this.outDeviceNum);
     
+    this.hardCodedTest(0);
+    
+  }
+  
+  private void hardCodedTest(int step) {
+    List<Fiducial> list = this.columns.get(step);
+    println("["+step+"]: "+list);
+    for ( Fiducial f : list ) {
+      f.play();
+    }
+  }
+  
+  private void hardCodedAddFiducial(int id) {
+    if ( !this.fiducialInColumn.containsKey(id) ) {
+      int randomColumn = (int)random(0, 15);
+      this.fiducialInColumn.put(id, randomColumn);
+      Fiducial f = new Fiducial(id, this.midiBus);
+      this.columns.get(randomColumn).add(f);
+    }
+  }
+  
+  public void addFiducial(int id) {
+    /*TODO implement correct method*/
+    this.hardCodedAddFiducial(id);
+  }
+  
+  public void updateFiducial( int id, float angle ) {
+    /*TODO param for row*/
+    if ( this.fiducialInColumn.containsKey(id) ) {
+      int theColumn = this.fiducialInColumn.get(id);
+      for(Fiducial f : this.columns.get(theColumn)) {
+        if ( f.getId() == id ) {
+          f.setAngle(angle);
+        }
+      }
+    }
+  }
+  
+  public void removeFiducial(int id) {
+    if ( this.fiducialInColumn.containsKey(id) ) {
+      int theColumn = this.fiducialInColumn.get(id);
+      this.columns.get(theColumn).remove(new Fiducial(id));
+    }
   }
   
   private void incrementStep() {
@@ -51,14 +94,15 @@ public class InstrumentsMaster {
       this.step++;
       if ( this.step > 15 ) {
         this.step = 0;
+      } else {
+        this.hardCodedTest(this.step);
       }
-      //println(step);
       this.lastStepSoundAt = now;
     }
   }
   
   public void play() {
-    incrementStep();
+    this.incrementStep();
   }
   
   public void playCurrentStep() {

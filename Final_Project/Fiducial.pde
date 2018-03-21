@@ -12,7 +12,7 @@ public class Fiducial {
   public Fiducial(int id) {
     this.row = -1;
     this.id = id;
-    this.scale = ScalesEnum.MAJOR.scale;
+    this.scale = ScalesEnum.NAIRUZ.scale;
     this.rotation = 90.0f;
     this.mapNoteFromRotation();
   }
@@ -20,7 +20,7 @@ public class Fiducial {
   public Fiducial(int id, MidiBus midiBus) {
     this.row = -1;
     this.id = id;
-    this.scale = ScalesEnum.MAJOR.scale;
+    this.scale = ScalesEnum.NAIRUZ.scale;
     this.rotation = 90.0f;
     this.midiBus = midiBus;
     this.mapNoteFromRotation();
@@ -64,7 +64,7 @@ public class Fiducial {
   }
   
   private void mapNoteFromRotation() {
-    int mapRotation = (int)map(this.rotation, 0, 180, 0, this.scale.length);
+    int mapRotation = (int)map(this.rotation, 0, 360, 0, this.scale.length);
     this.note = 60 + scale[mapRotation];
     //println("Mapped to: "+this.note);
   }

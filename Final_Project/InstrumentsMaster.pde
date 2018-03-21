@@ -86,6 +86,7 @@ public class InstrumentsMaster {
     if ( this.fiducialInColumn.containsKey(id) ) {
       int theColumn = this.fiducialInColumn.get(id);
       this.columns.get(theColumn).remove(new Fiducial(id));
+      this.fiducialInColumn.remove(id);
     }
   }
   

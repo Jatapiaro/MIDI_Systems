@@ -54,7 +54,7 @@ void drawTheGrid() {
       rect(x+10, y+25, boxsizeX, boxsizeY); 
       if ( this.isGridVisible == false ) {
         //float x, float y, float rw, float rh, int row, int col
-        CustomRect cr = new CustomRect(x+10, y+25, boxsizeX, boxsizeY, j, i);
+        CustomRect cr = new CustomRect(x, y, boxsizeX, boxsizeY, j, i);
         this.gridRects.add(cr);
       }
       textFont(font, 10); 
@@ -128,14 +128,15 @@ void drawTuioObjects() {
     textAlign(CENTER, BOTTOM);
     
     float fiducialXPosition = tobj.getScreenX(width-20);
-    float defX = (fiducialXPosition)-(obj_size/2);
+    float defX = (fiducialXPosition)-(obj_size/2) + 10;
     float fiducialYPosition = tobj.getScreenY(height-100);
-    float defY = (fiducialYPosition)-(obj_size/2);
-    CustomRect cr = new CustomRect(defX, defY, obj_size, obj_size, -1, -1);
+    float defY = (fiducialYPosition)-(obj_size/2) + 50;
+    CustomRect cr = new CustomRect(defX, defY, defX+obj_size, obj_size, -1, -1);
     for ( CustomRect r : this.gridRects ) {
       boolean b = r.onCollisionEnter(cr);
       if ( b == true ) {
-        //println("Collide with: "+r.row+" -> "+r.col);
+        println("Collide with: "+r.row+" -> "+r.col);
+        break;
       }
     }
   }

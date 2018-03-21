@@ -10,6 +10,7 @@ public class Fiducial {
   private int note;
 
   public Fiducial(int id) {
+    this.row = -1;
     this.id = id;
     this.scale = ScalesEnum.MAJOR.scale;
     this.rotation = 90.0f;
@@ -17,6 +18,7 @@ public class Fiducial {
   }
   
   public Fiducial(int id, MidiBus midiBus) {
+    this.row = -1;
     this.id = id;
     this.scale = ScalesEnum.MAJOR.scale;
     this.rotation = 90.0f;

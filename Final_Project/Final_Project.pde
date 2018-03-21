@@ -17,8 +17,13 @@ PFont font;
 boolean verbose = false; // print console debug messages
 boolean callback = true; // updates only after callbacks
 
+List<CustomRect> gridRects; 
+boolean isGridVisible;
+
 
 void setup() {
+  this.gridRects = new ArrayList<CustomRect>();
+  this.isGridVisible = false;
   this.master = new InstrumentsMaster();
   size(displayWidth,displayHeight);
   this.tuioSetup();
@@ -34,10 +39,11 @@ void draw() {
 }
 
 void drawTheGrid() {
+  
   int cols = 16;
   int rows = 8;
   int boxsizeX = (displayWidth-20)/cols;
-  int boxsizeY = (displayHeight)/rows;
+  int boxsizeY = (displayHeight-100)/rows;
   for (int i = 0; i < cols; i++) { 
     for (int j = 0; j < rows; j++) { 
       int x = i*boxsizeX; 
@@ -45,12 +51,22 @@ void drawTheGrid() {
       pushMatrix();
       fill(255); 
       stroke(0); 
-      rect(x+20, y-20, boxsizeX, boxsizeY); 
+      rect(x+10, y+25, boxsizeX, boxsizeY); 
+      if ( this.isGridVisible == false ) {
+        //float x, float y, float rw, float rh, int row, int col
+        CustomRect cr = new CustomRect(x+10, y+25, boxsizeX, boxsizeY, j, i);
+        this.gridRects.add(cr);
+      }
       textFont(font, 10); 
       fill(100, 150, 200); 
       popMatrix();
     } 
-  } 
+  }
+  if ( this.isGridVisible == false ) {
+    println(this.gridRects);
+  }
+  this.isGridVisible = true;
+  
 }  
 
 @Override
@@ -90,10 +106,8 @@ void tuioSetup() {
 void drawTuioObjects() {
   
   float obj_size = object_size*scale_factor; 
-  
   ArrayList<TuioObject> tuioObjectList = tuioClient.getTuioObjectList();
   for (int i=0; i < tuioObjectList.size(); i++) {
-    
     TuioObject tobj = tuioObjectList.get(i);
     stroke(0);
     fill(0,0,0);
@@ -104,13 +118,26 @@ void drawTuioObjects() {
       rect(-obj_size/2,-obj_size/2,obj_size,obj_size);
     }
     popMatrix();
+    
     fill(255, 0, 0);
     text(
       ""+tobj.getSymbolID(), 
       tobj.getScreenX(width), 
       tobj.getScreenY(height)
-      ); 
+      );
     textAlign(CENTER, BOTTOM);
+    
+    float fiducialXPosition = tobj.getScreenX(width-20);
+    float defX = (fiducialXPosition)-(obj_size/2);
+    float fiducialYPosition = tobj.getScreenY(height-100);
+    float defY = (fiducialYPosition)-(obj_size/2);
+    CustomRect cr = new CustomRect(defX, defY, obj_size, obj_size, -1, -1);
+    for ( CustomRect r : this.gridRects ) {
+      boolean b = r.onCollisionEnter(cr);
+      if ( b == true ) {
+        println("Collide with: "+r.row+" -> "+r.col);
+      }
+    }
   }
 }
 

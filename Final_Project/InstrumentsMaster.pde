@@ -35,7 +35,7 @@ public class InstrumentsMaster {
     
     /* Initialice velocity of steps */
     this.lastStepSoundAt = millis();
-    this.stepVelocity = 500;
+    this.stepVelocity = 250;
     this.step = 0;
     
     /* Initialice midibus */
@@ -60,6 +60,7 @@ public class InstrumentsMaster {
       int randomColumn = (int)random(0, 15);
       this.fiducialInColumn.put(id, randomColumn);
       Fiducial f = new Fiducial(id, this.midiBus);
+      f.setRow(-1);//TODO add real values
       this.columns.get(randomColumn).add(f);
     }
   }

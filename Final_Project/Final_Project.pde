@@ -135,7 +135,7 @@ void drawTuioObjects() {
     for ( CustomRect r : this.gridRects ) {
       boolean b = r.onCollisionEnter(cr);
       if ( b == true ) {
-        println("Collide with: "+r.row+" -> "+r.col);
+        //println("Collide with: "+r.row+" -> "+r.col);
       }
     }
   }

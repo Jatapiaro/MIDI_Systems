@@ -4,7 +4,6 @@ MIDIClient.sources
 MIDIIn.connectAll
 
 MIDIIn.connect(0, MIDIClient.sources.at(5))
-MIDIIn.con..nect(0, MIDIClient.sources.at(5))
 MIDIIn.disconnect(0, MIDIClient.sources.at(5))
 
 MIDIIn.findPort("Mbox", "External")
